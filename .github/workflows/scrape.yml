@@ -11,8 +11,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: funding-scan
@@ -61,18 +59,26 @@ jobs:
   deploy:
     needs: scan
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
           fetch-depth: 0
-      - run: git pull --ff-only || true
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-      - id: deployment
-        uses: actions/deploy-pages@v4
+
+      - name: Pull the data the scan just committed
+        run: git pull --ff-only origin main || true
+
+      # Publishes to the gh-pages branch rather than the Pages deployment API,
+      # so the site works with Pages set to "Deploy from a branch: gh-pages".
+      # That is a single repository setting instead of three.
+      - name: Publish site to gh-pages
+        run: |
+          git config user.name  "funding-radar"
+          git config user.email "actions@github.com"
+          rm -rf /tmp/site && mkdir -p /tmp/site
+          cp -r docs/. /tmp/site/
+          touch /tmp/site/.nojekyll
+          cd /tmp/site
+          git init -q
+          git add -A
+          git commit -q -m "Publish site $(date -u +%Y-%m-%d)"
+          git push --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:gh-pages
