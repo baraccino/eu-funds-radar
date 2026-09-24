@@ -39,7 +39,7 @@ sources:
     call_type: national
     countries: [BiH]
     programme: "Federacija BiH"
-    verified: false
+    verified: true
     note: "Federal agriculture support. Incentives page is attachment-driven; main listing used instead."
 
   - id: bih-eu-delegation
@@ -71,7 +71,7 @@ sources:
     category: IT
     call_type: cascade
     programme: "EUDIS cascade"
-    verified: false
+    verified: true
     note: "EU Defence Innovation Scheme cascade calls."
 
   # ----------------------------------------------------------- Interreg
