@@ -1,6 +1,27 @@
 # Tunable ranking parameters. Everything the scores depend on lives here,
 # so you can re-tune without touching code.
 
+limits:
+  # Hard ceiling. Anything larger is a consortium-scale project and is gated
+  # out regardless of how well it scores.
+  max_grant_eur: 1000000
+
+competition:
+  # Relative size of the eligible applicant pool, by who may apply.
+  # These are NOT published competition figures — nobody publishes those.
+  # They are a documented proxy: a call open to one canton draws vastly fewer
+  # applicants than one open to all of Europe. Used only by the "easiest
+  # money" ranking, and shown in the UI as an estimate.
+  pool_weight:
+    cantonal:      1     # one canton, e.g. Hercegbosanska
+    bih_croats:    3     # Croats in BiH — Croatian state programmes aimed here
+    bih_national:  6     # all of BiH
+    hr_national:  12     # all of Croatia
+    crossborder:  25     # Interreg programme areas
+    cascade:      30     # EU-wide but small, SME-facing pools
+    eu_wide:     100     # open to the whole EU and associated countries
+  default_scope: eu_wide
+
 cash_velocity:
   # Default assumptions used ONLY when a call does not state the real value.
   # Anything assumed is flagged in the UI so you never mistake it for fact.

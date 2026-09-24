@@ -192,3 +192,72 @@ def test_multi_country_scope_is_caught():
     c = enrich(mk(title="Call for proposal for support to Slovenian and Croatian SCOs",
                   grant_max=60_000), CFG, PROF)
     assert any("scoped to" in f for f in apply_gates(c, CFG, PROF))
+
+
+# ---------------------------------------------------------- new filters
+def test_grants_over_one_million_are_gated_out():
+    c = enrich(mk(title="Huge consortium call", grant_max=5_000_000), CFG, PROF)
+    flags = apply_gates(c, CFG, PROF)
+    assert any("cap" in f for f in flags), flags
+
+
+def test_grant_just_under_the_cap_survives():
+    c = enrich(mk(title="Sensible sized call", grant_max=950_000), CFG, PROF)
+    assert not any("cap" in f for f in apply_gates(c, CFG, PROF))
+
+
+def test_croatian_programme_for_bih_is_recategorised_and_low_competition():
+    c = enrich(mk(title="Javni poziv za potpore poljoprivrednim projektima Hrvata u Bosni i Hercegovini",
+                  grant_max=100_000, expected_grants=221), CFG, PROF)
+    assert c.category == "HR→BiH"
+    assert c.scope == "bih_croats"
+    assert c.pool_weight == 3
+    assert c.odds_proxy > 70
+
+
+def test_easiest_ranking_prefers_many_awards_in_a_small_pool():
+    from radar.rank import easiest_score
+    local = enrich(mk(title="Javni poziv Hrvata u Bosni i Hercegovini",
+                      grant_max=100_000, expected_grants=221), CFG, PROF)
+    euwide = enrich(mk(title="Pan-European innovation action",
+                       grant_max=900_000, expected_grants=3), CFG, PROF)
+    for c in (local, euwide):
+        c.easiest_score = easiest_score(c)
+    assert local.easiest_score > euwide.easiest_score
+    assert 0 <= euwide.easiest_score <= 100
+
+
+def test_cantonal_call_is_the_smallest_pool():
+    c = enrich(mk(source="hbz-mpvs", title="Javni poziv za potporu mladim poljoprivrednicima",
+                  grant_max=20_000), CFG, PROF)
+    assert c.scope == "cantonal"
+    assert c.pool_weight == 1
+
+
+def test_eu_wide_is_the_default_scope():
+    c = enrich(mk(source="sedia", title="Research and innovation action", grant_max=800_000), CFG, PROF)
+    assert c.scope == "eu_wide"
+    assert c.pool_weight == 100
+
+
+def test_known_programme_facts_fill_blanks_only():
+    import yaml as _y
+    from radar.enrich import apply_known
+    known = _y.safe_load((ROOT / "config/known_programmes.yml").read_text())["programmes"]
+
+    c = apply_known(mk(title="Javni poziv za dodjelu potpora razvoju poljoprivrednih "
+                             "projekata Hrvata u Bosni i Hercegovini za 2026."), known)
+    assert c.expected_grants == 221
+    assert c.grant_max == 100_000
+    assert c.category == "HR→BiH"
+    assert any("known programme" in n for n in c.raw_notes)
+
+
+def test_known_programme_never_overwrites_scraped_values():
+    import yaml as _y
+    from radar.enrich import apply_known
+    known = _y.safe_load((ROOT / "config/known_programmes.yml").read_text())["programmes"]
+    c = apply_known(mk(title="potpore poljoprivrednim projektima Hrvata u Bosni i Hercegovini",
+                       grant_max=55_000, expected_grants=9), known)
+    assert c.grant_max == 55_000, "a real scraped figure must win over the stored one"
+    assert c.expected_grants == 9

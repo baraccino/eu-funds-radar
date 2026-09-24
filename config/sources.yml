@@ -54,6 +54,42 @@ sources:
     verified: false
     note: "IPA and EU-funded calls for BiH. URL needs confirming."
 
+  # ------------------------------- Croatian money, open to people in BiH
+  # The lowest-competition funding a BiH applicant can reach. Croatia runs
+  # dedicated national programmes for Croats living in BiH: the applicant pool
+  # is a few hundred thousand people instead of all of Europe. The 2026
+  # agriculture round approved 221 projects out of a EUR 4M envelope, with a
+  # EUR 100k ceiling per project.
+  - id: hr-croats-abroad
+    name: "Croatia — Central State Office for Croats Abroad"
+    url: "https://hrvatiizvanrh.gov.hr/natjecaji-574/574"
+    link_selector: "a"
+    title_min_len: 22
+    category: "HR→BiH"
+    call_type: national
+    countries: [HR, BiH]
+    programme: "Hrvati izvan RH"
+    verified: true
+    note: >-
+      Runs annual calls for education, science, culture, health and agriculture
+      projects of interest to Croats in BiH. Eligible applicants include legal
+      entities based in BiH and BiH residents registered in agriculture.
+
+  - id: hr-mps
+    name: "Croatia — Ministry of Agriculture, public calls"
+    url: "https://poljoprivreda.gov.hr/javni-pozivi-i-natjecaji/1198"
+    link_selector: "li a, h2 a, h3 a, .title a"
+    title_min_len: 22
+    category: Croatia
+    call_type: national
+    countries: [HR]
+    programme: "Ministarstvo poljoprivrede RH"
+    verified: true
+    note: >-
+      Includes the support programme for agricultural projects of Croats in
+      BiH (EUR 4M/year 2026-2028, ceiling EUR 100k per project) and state
+      agricultural land lease tenders.
+
   # ------------------------------------------------------------ Cascade
   # Cascade sub-calls are NOT in the EU portal API (verified), so a curated
   # aggregator is the only practical index.

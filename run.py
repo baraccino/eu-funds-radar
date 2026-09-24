@@ -43,6 +43,9 @@ def main() -> int:
     cfg = yaml.safe_load((ROOT / "config/ranking.yml").read_text())
     profile = yaml.safe_load((ROOT / "config/profile.yml").read_text())
     sources_cfg = yaml.safe_load((ROOT / "config/sources.yml").read_text())["sources"]
+    known_path = ROOT / "config/known_programmes.yml"
+    known = (yaml.safe_load(known_path.read_text())["programmes"]
+             if known_path.exists() else [])
 
     previous = load_previous()
     prev_calls = previous.get("calls", [])
@@ -95,7 +98,7 @@ def main() -> int:
     calls = list(by_uid.values())
 
     log(f"\nEnriching and ranking {len(calls)} calls")
-    calls = enrich_all(calls, cfg, profile)
+    calls = enrich_all(calls, cfg, profile, known)
     calls = rank_all(calls, cfg, profile)
 
     clean = [c for c in calls if not c.gates_failed]

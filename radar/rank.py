@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import re
 
+import math
+
 from radar.models import Call
 
 # Calls that restrict WHO may apply. These are not judgements about the
@@ -54,6 +56,10 @@ def apply_gates(call: Call, cfg: dict, profile: dict) -> list[str]:
         failed.append("deadline passed")
     elif d is not None and d < g["min_days_to_deadline"]:
         failed.append(f"under {g['min_days_to_deadline']} days left")
+
+    cap = cfg.get("limits", {}).get("max_grant_eur")
+    if cap and call.grant_size is not None and call.grant_size > cap:
+        failed.append(f"over EUR {cap:,.0f} cap")
 
     if g.get("exclude_below_min_grant") and call.grant_size is not None:
         if call.grant_size < profile["constraints"]["min_grant_eur"]:
@@ -159,6 +165,29 @@ def cash_velocity_risk(call: Call, raw_cv: float | None) -> float | None:
     return raw_cv * (p ** RISK_AVERSION)
 
 
+# ------------------------------------------------------ easiest money
+def easiest_score(call: Call) -> float | None:
+    """How likely you are to actually walk away with this, 0-100.
+
+    Competition data is essentially never published, so this is built from two
+    things that ARE knowable: how many awards the call expects to make, and how
+    large the pool of people allowed to apply is. A cantonal call making 30
+    awards is a different universe from a pan-EU call making 3.
+
+        odds_proxy = awards / pool_weight
+        ease       = normalised(odds_proxy) x effort_factor
+
+    It is a proxy and the UI labels it as one. It is not a probability.
+    """
+    if call.odds_proxy is None:
+        return None
+    # log scale: odds of 100 awards-per-pool-unit reaches the top of the range
+    base = math.log10(1 + call.odds_proxy * 100) / math.log10(1 + 100 * 100)
+    effort = call.effort_days or 20
+    effort_factor = 15 / (15 + effort)
+    return round(min(100.0, max(0.0, 100 * base * effort_factor)), 1)
+
+
 # ---------------------------------------------------------------- weighted
 def weighted_score(call: Call, cfg: dict) -> float:
     """Classic 0-100 rubric, same shape as the second brain's board."""
@@ -192,6 +221,7 @@ def rank_all(calls: list[Call], cfg: dict, profile: dict) -> list[Call]:
         c.tier = tier_of(c, cfg)
         c.cash_velocity, c.expected_cash = cash_velocity(c)
         c.cash_velocity_risk = cash_velocity_risk(c, c.cash_velocity)
+        c.easiest_score = easiest_score(c)
         c.weighted_score = weighted_score(c, cfg)
     return sort_combined(calls)
 

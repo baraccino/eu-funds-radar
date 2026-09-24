@@ -74,6 +74,7 @@ class Call:
     # applicant shape
     min_partners: int | None = None
     countries: list[str] = field(default_factory=list)
+    scope: str | None = None          # who may apply; drives the competition proxy
 
     # free text
     summary: str = ""
@@ -100,6 +101,9 @@ class Call:
     tier: int | None = None
     cash_velocity: float | None = None
     cash_velocity_risk: float | None = None
+    pool_weight: float | None = None
+    odds_proxy: float | None = None
+    easiest_score: float | None = None
     weighted_score: float | None = None
     expected_cash: float | None = None
 

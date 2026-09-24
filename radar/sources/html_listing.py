@@ -28,7 +28,8 @@ CALL_WORDS = re.compile(
 )
 # Links that look like calls but are jobs, not money for projects.
 NOISE = re.compile(
-    r"prijem\s+\w+|radnog\s+mjesta|popunu\s+upra[zž]njenog|zapo[sš]ljavanj"
+    r"prijem\s+\w+|radn\w+\s+mjest|popunu\s+|zapo[sš]ljavanj|izbor\s+notara"
+    r"|nazo[cč]io|sjednic[ai]|obilje[zž]|posjet|izbor\s+i\s+nominiranje|za\s+izbor\s+"
     r"|pripravnik|vje[zž]benik|namje[sš]tenik|vacancy|recruitment|stru[cč]no\s+osposob"
     r"|imenovanje|razrje[sš]enj|prodaj[au]\s+|licitacij|zakup\s+poslovn",
     re.I,
@@ -37,7 +38,7 @@ DATE_RX = re.compile(r"(\d{1,2}[.\-/]\d{1,2}[.\-/]\d{4})|(\d{4}-\d{2}-\d{2})")
 # Titles that match a call keyword but are not themselves a call to apply to.
 NOT_A_CALL = re.compile(
     r"^https?://|^www\.|factsheet|newsletter|privacy|cookie|guidance\s+note"
-    r"|frequently\s+asked|^obrazac|^prijavni\s+obrazac|^formular|\.pdf$"
+    r"|frequently\s+asked|obrazac|prijavni\s+obrazac|formular|\.pdf$|^odluka\s+o\s+dodjeli"
     r"|internship|scholarship|traineeship|fellowship|summer\s+school|\bphd\b"
     r"|master\s+thesis|mobility\s+grant|doctoral",
     re.I,

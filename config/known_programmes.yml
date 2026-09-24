@@ -1,0 +1,47 @@
+# Facts about specific programmes that their listing pages do not carry.
+#
+# Scraped listings give a title and a link, nothing more. Where a programme's
+# size and award count have been established from primary reporting, they are
+# recorded here with a source so the ranking can use them. Every entry must
+# cite where the figure came from; anything unverified stays out.
+#
+# match: case-insensitive regex against the call title.
+
+programmes:
+  - id: hr-mps-bih-agri
+    # "projekata" is the genitive plural of "projekt" — the t moves, so a
+    # "projekt\\w+" stem never matches it. Croatian declension, not a typo.
+    match: "poljoprivredn\\w+\\s+projek\\w+\\s+hrvata\\s+u\\s+bosni"
+    name: "Potpore poljoprivrednim projektima Hrvata u BiH"
+    grant_max: 100000
+    expected_grants: 221
+    scope: bih_croats
+    category: "HR→BiH"
+    note: >-
+      EUR 4,000,000 per year under a three-year programme (2026-2028, EUR 12M
+      total). Ceiling EUR 100,000 per project. 221 projects were approved in
+      the 2026 round. Applicants are Croats resident or registered in BiH.
+    source: "https://poljoprivreda.gov.hr/vijesti/objavljen-javni-poziv-za-dodjelu-potpora-razvoju-poljoprivrednih-projekata-hrvata-u-bosni-i-hercegovini-za-2026-godinu/8262"
+    retrieved: "2026-09-24"
+
+  - id: hr-croats-bih-programmes
+    match: "hrvatski\\s+narod\\s+u\\s+bosni|obrazovnih,\\s*znanstvenih,\\s*kulturnih"
+    name: "Programi i projekti od interesa za hrvatski narod u BiH"
+    scope: bih_croats
+    category: "HR→BiH"
+    note: >-
+      Up to EUR 10 million for education, science, culture, health and
+      agriculture projects of interest to Croats in BiH. Eligible applicants
+      include legal entities based in BiH and BiH residents registered in
+      agriculture. Per-project ceiling not established — left unknown.
+    source: "https://hrvatiizvanrh.gov.hr/javni-natjecaj-za-financiranje-obrazovnih-znanstvenih-kulturnih-zdravstvenih-poljoprivrednih-i-ostalih-programa-i-projekata-od-interesa-za-hrvatski-narod-u-bosni-i-hercegovini-za-2026-godinu-6536/6536"
+    retrieved: "2026-09-24"
+
+  - id: hr-croats-abroad-special
+    match: "posebnih\\s+potreba\\s+i\\s+projekata\\s+od\\s+interesa\\s+za\\s+hrvate\\s+izvan"
+    name: "Posebne potrebe i projekti od interesa za Hrvate izvan RH"
+    scope: bih_croats
+    category: "HR→BiH"
+    note: "Annual call open to Croats outside Croatia, including in BiH."
+    source: "https://hrvatiizvanrh.gov.hr/natjecaji-574/574"
+    retrieved: "2026-09-24"

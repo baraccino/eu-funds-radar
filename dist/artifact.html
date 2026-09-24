@@ -166,6 +166,7 @@ h1{font-family:"IBM Plex Mono","SF Mono",ui-monospace,monospace;font-weight:600;
         <span>Rank by</span>
         <select id="sort">
           <option value="combined">Combined — gates, tier, then cash velocity</option>
+          <option value="easiest">Easiest money — fewest applicants, most awards</option>
           <option value="cvr">Cash velocity (risk-adjusted)</option>
           <option value="cv">Cash velocity (raw, risk-neutral)</option>
           <option value="weighted">Weighted score 0–100</option>
@@ -224,6 +225,16 @@ function save() {
   catch { /* private mode — decisions just won't persist */ }
 }
 
+const SCOPE = {
+  cantonal: "one canton",
+  bih_croats: "Croats in BiH",
+  bih_national: "all BiH",
+  hr_national: "all Croatia",
+  crossborder: "cross-border area",
+  cascade: "EU SMEs",
+  eu_wide: "all of Europe",
+};
+
 const eur = n =>
   n == null ? "—"
   : n >= 1e6 ? "€" + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + "M"
@@ -239,6 +250,8 @@ const SORTS = {
     (a.gates_failed.length > 0) - (b.gates_failed.length > 0) ||
     (a.tier ?? 9) - (b.tier ?? 9) ||
     (b.cash_velocity_risk ?? -1) - (a.cash_velocity_risk ?? -1),
+  easiest:  (a, b) => (b.easiest_score ?? -1) - (a.easiest_score ?? -1) ||
+                      (b.grant_size ?? -1) - (a.grant_size ?? -1),
   cvr:      (a, b) => (b.cash_velocity_risk ?? -1) - (a.cash_velocity_risk ?? -1),
   cv:       (a, b) => (b.cash_velocity ?? -1) - (a.cash_velocity ?? -1),
   weighted: (a, b) => (b.weighted_score ?? -1) - (a.weighted_score ?? -1),
@@ -250,6 +263,7 @@ const SORTS = {
 
 const EXPLAIN = {
   combined: "Flagged calls last, then tier (1 = easiest money), then risk-adjusted €/day. The default.",
+  easiest: "Most likely to actually land: many awards, few eligible applicants, little work. Built from awards-per-call and how wide the eligibility is — nobody publishes real competition figures, so this is a proxy, not a probability.",
   cvr: "Expected € per day of your effort, discounted for how long the money takes and penalised for long-shot odds.",
   cv: "Expected € per day, risk-neutral. This deliberately favours big grants with low win odds — compare against the risk-adjusted view.",
   weighted: "Classic 0–100 rubric across money, upfront, ease, odds, fit and speed.",
@@ -283,10 +297,11 @@ function kpis(rows) {
   const saved = Object.values(state.decisions).filter(v => v === "saved").length;
   const soon = rows.filter(r => r.days_to_deadline != null &&
                                 r.days_to_deadline >= 0 && r.days_to_deadline <= 30).length;
+  const hrbih = rows.filter(r => r.category === "HR→BiH").length;
   const tiles = [
     [rows.length, "shown now"],
-    [c.total, "tracked total"],
     [tier1, "tier 1 — easy money"],
+    [hrbih, "Croatian → BiH"],
     [soon, "closing in 30 days"],
     [saved, "you saved"],
   ];
@@ -303,7 +318,9 @@ function card(c) {
     : "no deadline listed";
   const decision = state.decisions[c.uid];
 
-  const headline = state.sort === "weighted"
+  const headline = state.sort === "easiest"
+    ? [c.easiest_score == null ? "—" : c.easiest_score.toFixed(0), "ease / 100"]
+    : state.sort === "weighted"
     ? [c.weighted_score == null ? "—" : c.weighted_score.toFixed(0), "score / 100"]
     : state.sort === "amount" || state.sort === "deadline"
       ? [eur(c.grant_size), "grant size"]
@@ -318,6 +335,8 @@ function card(c) {
         <span>·</span><span>${dl}</span>
         <span>·</span><span>${c.effort_days ?? "?"}d effort<span class="est">est</span></span>
         <span>·</span><span>${Math.round((c.upfront_pct ?? 0) * 100)}% up front${c.upfront_assumed ? '<span class="est">est</span>' : ""}</span>
+        ${c.scope ? `<span>·</span><span>open to ${esc(SCOPE[c.scope] || c.scope)}${
+          c.expected_grants ? ` · ${c.expected_grants} award${c.expected_grants === 1 ? "" : "s"}` : ""}</span>` : ""}
       </p>
       <div class="tags">
         <span class="tag tier">Tier ${t}</span>

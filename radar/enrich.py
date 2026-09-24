@@ -97,8 +97,56 @@ def _grant_size(call: Call) -> tuple[float | None, bool]:
     return None, True
 
 
+# Croatian state programmes aimed explicitly at Croats living in BiH. These
+# are the lowest-competition money available to a BiH applicant: the pool is a
+# few hundred thousand people rather than all of Europe, and the 2026
+# agriculture round alone approved 221 projects.
+HR_TO_BIH = re.compile(
+    r"hrvat\w*\s+u\s+bosni|hrvate\s+izvan|hrvata\s+izvan|hrvatski\s+narod\s+u\s+bosni"
+    r"|iseljeni[sš]tv|croats?\s+(abroad|in\s+bosnia)", re.I)
+
+
+def _scope(call: Call) -> str:
+    """Who may apply. Drives the competition proxy, so keep it conservative."""
+    src, blob = call.source, f"{call.title} {call.summary}".lower()
+
+    if HR_TO_BIH.search(blob) or src in ("hr-croats-abroad", "hr-mps-bih"):
+        return "bih_croats"
+    if src.startswith("hbz-"):
+        return "cantonal"
+    if src.startswith("fbih-") or call.category == "BiH":
+        return "bih_national"
+    if src.startswith("hr-") or call.category == "Croatia":
+        return "hr_national"
+    if call.category == "Interreg":
+        return "crossborder"
+    if call.call_type == "cascade":
+        return "cascade"
+    return "eu_wide"
+
+
+def apply_known(call: Call, known: list[dict]) -> Call:
+    """Fill in facts a listing page cannot carry.
+
+    A scraped listing gives a title and a link. Where a programme's size and
+    award count have been established from primary reporting, config/
+    known_programmes.yml supplies them with a citation. Values already present
+    on the call always win — this only fills blanks.
+    """
+    for prog in known:
+        if not re.search(prog["match"], call.title, re.I):
+            continue
+        for field in ("grant_max", "expected_grants", "scope", "category"):
+            if prog.get(field) is not None and getattr(call, field, None) in (None, "Misc"):
+                setattr(call, field, prog[field])
+        call.raw_notes.append(f"known programme: {prog['name']} — {prog.get('source', '')}")
+        break
+    return call
+
+
 def enrich(call: Call, cfg: dict, profile: dict) -> Call:
     cv = cfg["cash_velocity"]
+    comp = cfg["competition"]
 
     size, assumed = _grant_size(call)
     call.grant_size, call.grant_size_assumed = size, assumed
@@ -153,6 +201,15 @@ def enrich(call: Call, cfg: dict, profile: dict) -> Call:
         p = 0.05           # one winner, open to all of Europe: be honest
     call.win_probability = p
 
+    # --- competition proxy -------------------------------------------------
+    if HR_TO_BIH.search(f"{call.title} {call.summary}"):
+        call.category = "HR→BiH"
+    call.scope = call.scope or _scope(call)
+    call.pool_weight = comp["pool_weight"].get(
+        call.scope, comp["pool_weight"][comp["default_scope"]])
+    awards = call.expected_grants or 1
+    call.odds_proxy = awards / call.pool_weight
+
     call.fit_score = _fit(call, profile)
     return call
 
@@ -172,5 +229,7 @@ def _fit(call: Call, profile: dict) -> float:
     return 0.4
 
 
-def enrich_all(calls: list[Call], cfg: dict, profile: dict) -> list[Call]:
-    return [enrich(c, cfg, profile) for c in calls]
+def enrich_all(calls: list[Call], cfg: dict, profile: dict,
+               known: list[dict] | None = None) -> list[Call]:
+    known = known or []
+    return [enrich(apply_known(c, known), cfg, profile) for c in calls]
