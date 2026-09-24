@@ -1,0 +1,52 @@
+# Tunable ranking parameters. Everything the scores depend on lives here,
+# so you can re-tune without touching code.
+
+cash_velocity:
+  # Default assumptions used ONLY when a call does not state the real value.
+  # Anything assumed is flagged in the UI so you never mistake it for fact.
+  default_win_probability: 0.15
+  default_prefinancing_pct: 0.50
+  # Verified: Horizon lump-sum grants pre-finance at ~80% for a single
+  # reporting period, minus 5-8% retained for the Mutual Insurance Mechanism.
+  lump_sum_prefinancing_pct: 0.80
+  mutual_insurance_retention: 0.06
+  cascade_prefinancing_pct: 0.70      # typical for FSTP; assumption, flagged
+  # Effort estimates in person-days to produce a submittable proposal.
+  effort_days:
+    cascade: 4
+    single_beneficiary: 12
+    small_consortium: 25
+    large_consortium: 45
+    tender: 15
+    unknown: 20
+  # Days from deadline to money actually arriving. Used for the time penalty.
+  time_to_cash_days:
+    cascade: 75
+    single_stage: 210
+    two_stage: 330
+    tender: 120
+    unknown: 240
+
+weighted:
+  # Classic 0-100 rubric. Weights must sum to 10.
+  weights:
+    money: 3.0
+    upfront: 2.5
+    ease: 2.0
+    probability: 1.0
+    fit: 1.0
+    speed: 0.5
+
+tiers:
+  # Tier 1 is "easy money". Lower tier number = better.
+  # A call lands in the lowest tier whose conditions it fully satisfies.
+  t1: { max_effort_days: 6,  min_upfront_pct: 0.60, max_partners: 1, max_time_to_cash: 120 }
+  t2: { max_effort_days: 15, min_upfront_pct: 0.40, max_partners: 3, max_time_to_cash: 250 }
+  t3: { max_effort_days: 30, min_upfront_pct: 0.01, max_partners: 6, max_time_to_cash: 400 }
+  # t4 = everything else (reimbursement-only / long cycle / huge consortium)
+
+gates:
+  # Gates FLAG, they never silently delete. You can toggle them in the UI.
+  min_days_to_deadline: 10
+  exclude_closed: true
+  exclude_below_min_grant: true

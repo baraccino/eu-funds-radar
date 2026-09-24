@@ -1,0 +1,106 @@
+# Non-API sources. Each is data, not code — add a site by adding a block.
+#
+# verified: true  = selectors were tested against the live page and matched
+# verified: false = plausible target, NOT yet confirmed. Run verify_sources.py.
+#
+# A source returning 0 rows is reported loudly, because "no calls this week"
+# and "the scraper broke" look identical otherwise.
+
+sources:
+  # ---------------------------------------------------------------- BiH
+  - id: hbz-mpvs
+    name: "Canton 10 — Ministry of Agriculture (HBŽ)"
+    url: "https://mpvs-hbz.gov.ba/"
+    link_selector: "h2 a"
+    category: BiH
+    call_type: national
+    countries: [BiH]
+    programme: "Hercegbosanska županija"
+    verified: true
+    note: "Cantonal ministry for Tomislavgrad's canton. Young-farmer and agrotourism calls appear here."
+
+  - id: hbz-vlada
+    name: "Canton 10 — Government public calls"
+    url: "https://www.vladahbz.com/javni-natjecaji/"
+    link_selector: "li a"
+    title_min_len: 30
+    category: BiH
+    call_type: national
+    countries: [BiH]
+    programme: "Vlada Hercegbosanske županije"
+    verified: true
+    note: "All cantonal public calls. Heavy job-vacancy noise, filtered out."
+
+  - id: fbih-mpvs
+    name: "FBiH — Ministry of Agriculture"
+    url: "https://fmpvs.gov.ba/"
+    link_selector: "h2 a, h3 a, .entry-title a"
+    category: BiH
+    call_type: national
+    countries: [BiH]
+    programme: "Federacija BiH"
+    verified: false
+    note: "Federal agriculture support. Incentives page is attachment-driven; main listing used instead."
+
+  - id: bih-eu-delegation
+    name: "EU Delegation to BiH — calls"
+    url: "https://europa.ba/?page_id=huge"
+    link_selector: "h2 a, h3 a, .entry-title a"
+    category: BiH
+    call_type: national
+    countries: [BiH]
+    programme: "EU in BiH"
+    verified: false
+    note: "IPA and EU-funded calls for BiH. URL needs confirming."
+
+  # ------------------------------------------------------------ Cascade
+  - id: cascade-innovarum
+    name: "Cascade funding tracker (Innovarum)"
+    url: "https://innovarum.es/en/horizon-europe/cascade-funding-fstp-opening-project-doors-to-farmers-cooperatives-and-start-ups/"
+    link_selector: "a"
+    category: IT
+    call_type: cascade
+    programme: "Cascade / FSTP"
+    verified: false
+    note: "Aggregator of FSTP open calls. The easy-money layer."
+
+  - id: cascade-eudis
+    name: "EUDIS cascade funding"
+    url: "https://eudis.europa.eu/eudis-tracks/cascade-funding_en"
+    link_selector: "a"
+    category: IT
+    call_type: cascade
+    programme: "EUDIS cascade"
+    verified: false
+    note: "EU Defence Innovation Scheme cascade calls."
+
+  # ----------------------------------------------------------- Interreg
+  - id: interreg-ipa-cbc
+    name: "Interreg IPA CBC Croatia–BiH–Montenegro"
+    url: "https://www.interreg-hr-ba-me2127.eu/"
+    link_selector: "h2 a, h3 a, .entry-title a, article a"
+    category: Interreg
+    call_type: grant
+    countries: [HR, BiH, ME]
+    programme: "Interreg IPA CBC HR-BA-ME"
+    verified: false
+
+  - id: interreg-adrion
+    name: "Interreg ADRION"
+    url: "https://www.adrioninterreg.eu/index.php/category/calls/"
+    link_selector: "h2 a, h3 a, .entry-title a"
+    category: Interreg
+    call_type: grant
+    countries: [BiH]
+    programme: "Interreg ADRION"
+    verified: false
+
+  - id: interreg-danube
+    name: "Interreg Danube Region"
+    url: "https://interreg-danube.eu/calls"
+    link_selector: "h2 a, h3 a, .entry-title a, .views-row a"
+    category: Interreg
+    call_type: grant
+    countries: [BiH]
+    programme: "Interreg Danube"
+    verified: false

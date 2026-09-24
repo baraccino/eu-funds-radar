@@ -1,0 +1,75 @@
+name: Weekly funding scan
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"        # Mondays 06:00 UTC
+  workflow_dispatch:            # and whenever you click Run workflow
+  push:
+    paths:
+      - "config/**"             # re-rank immediately when you retune
+      - "radar/**"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: funding-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: python -m pytest tests/ -q
+
+      - name: Scrape, enrich and rank
+        run: python run.py
+
+      - name: Report source health
+        if: always()
+        run: python verify_sources.py || true   # informational, never fails the run
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name  "funding-radar"
+          git config user.email "actions@github.com"
+          if git diff --quiet docs/data/calls.json; then
+            echo "No change in call data."
+          else
+            n=$(python -c "import json;d=json.load(open('docs/data/calls.json'));print(d['counts']['total'])")
+            git add docs/data/calls.json
+            git commit -m "Weekly scan $(date -u +%Y-%m-%d): ${n} calls"
+            git push
+          fi
+
+  deploy:
+    needs: scan
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - run: git pull --ff-only || true
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deployment
+        uses: actions/deploy-pages@v4

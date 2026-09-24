@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EU Funds Radar</title>
+<meta name="description" content="Weekly-refreshed EU and BiH funding calls, ranked for cash up front and low effort.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap topbar">
+    <div>
+      <h1>EU Funds Radar</h1>
+      <p class="sub" id="freshness">Loading…</p>
+    </div>
+    <div class="topactions">
+      <button id="themeBtn" class="btn ghost" type="button" aria-label="Toggle colour theme">Theme</button>
+      <button id="exportBtn" class="btn ghost" type="button">Export decisions</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="kpis" id="kpis" aria-label="Summary"></section>
+
+  <section class="controls" aria-label="Filters and sorting">
+    <div class="row">
+      <input id="q" type="search" placeholder="Search title, programme, keyword…" aria-label="Search">
+      <label class="sel">
+        <span>Rank by</span>
+        <select id="sort">
+          <option value="combined">Combined — gates, tier, then cash velocity</option>
+          <option value="cvr">Cash velocity (risk-adjusted)</option>
+          <option value="cv">Cash velocity (raw, risk-neutral)</option>
+          <option value="weighted">Weighted score 0–100</option>
+          <option value="tier">Tier only</option>
+          <option value="amount">Grant size</option>
+          <option value="deadline">Deadline soonest</option>
+        </select>
+      </label>
+    </div>
+    <div class="row">
+      <div class="chips" id="cats" role="group" aria-label="Category"></div>
+      <label class="chk"><input type="checkbox" id="showGated"> Show flagged calls</label>
+      <label class="chk"><input type="checkbox" id="hideUnknown"> Hide unknown amounts</label>
+      <label class="chk"><input type="checkbox" id="onlySaved"> Saved only</label>
+    </div>
+  </section>
+
+  <p class="explain" id="explain"></p>
+  <div id="list" class="list"></div>
+  <p id="empty" class="empty" hidden>Nothing matches these filters.</p>
+
+  <section class="sources" id="sources"></section>
+</main>
+
+<footer class="wrap foot">
+  <p>Data from the EU Funding &amp; Tenders Portal SEDIA API plus configured national sources.
+     Refreshed weekly by GitHub Actions. Figures marked <span class="est">est</span> are derived, not published —
+     always confirm against the call document before committing time or money.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

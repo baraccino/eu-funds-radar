@@ -1,0 +1,34 @@
+# Who we are. Drives eligibility gates and fit scoring.
+# Every fact here was stated by the owner. Nothing is inferred.
+
+applicant:
+  citizenship: [BiH]
+  entities:
+    - { name: "dev agency",   country: BiH, type: company, sector: IT }
+    - { name: "other entity", country: BiH, type: TODO,    sector: TODO }
+  # TODO: confirm exact legal forms, registration numbers, VAT/PDV status,
+  # and whether any entity is registered in Croatia.
+
+capability:
+  # The agency can build almost anything IT-related that is not extremely
+  # specialised or extremely large. Used for the "can we deliver" factor.
+  strong: [web, mobile, backend, api, data, automation, ai-integration, saas, devops]
+  weak:   [quantum, semiconductor-fab, aerospace-hardware, clinical-trials, nuclear]
+  # Network of collaborators across other sectors who want easy EU projects.
+  partner_sectors: [agriculture, tourism, culture, education, youth, energy, health, social]
+
+constraints:
+  min_grant_eur: 5000          # below this, not worth the paperwork
+  max_consortium_partners: 6   # beyond this, coordination cost explodes
+  languages: [en, bs, hr, sr]
+  # No effort ceiling: owner chose "whatever, if the money is big enough".
+  effort_gate_days: null
+
+eligibility:
+  # Verified 2026-09-24. Re-check annually — association status changes.
+  horizon_europe: associated      # BiH associated since 2026-01-01
+  digital_europe: open            # opened to BiH
+  creative_europe: participant
+  erasmus_plus: partner_country   # certain actions only
+  ipa_iii: eligible
+  interreg: [IPA-CBC-HR-BA-ME, ADRION, DANUBE, EURO-MED]
