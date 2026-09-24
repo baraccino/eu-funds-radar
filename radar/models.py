@@ -87,6 +87,7 @@ class Call:
     # ---- filled in by enrich.py ----
     grant_size: float | None = None
     grant_size_assumed: bool = False
+    grant_is_ceiling: bool = False   # size is an upper bound, not an expected award
     upfront_pct: float | None = None
     upfront_assumed: bool = True
     effort_days: float | None = None

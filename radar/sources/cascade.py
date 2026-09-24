@@ -89,6 +89,7 @@ def scrape_table(src: dict, log=print) -> list[Call]:
                 deadline=min(future),
                 deadline_model="single-stage",
                 grant_max=src.get("assumed_grant_eur"),
+                grant_is_ceiling=bool(src.get("assumed_grant_eur")),
                 summary=src.get("note", ""),
                 retrieved=today.isoformat(),
                 raw_notes=[

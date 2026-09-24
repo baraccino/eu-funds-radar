@@ -261,3 +261,24 @@ def test_known_programme_never_overwrites_scraped_values():
                        grant_max=55_000, expected_grants=9), known)
     assert c.grant_max == 55_000, "a real scraped figure must win over the stored one"
     assert c.expected_grants == 9
+
+
+def test_cap_also_catches_huge_calls_with_unpublished_award_size():
+    """The cap used to keep exactly the calls it could not measure: an unknown
+    size can never exceed a ceiling, so 95M MSCA calls sailed through."""
+    c = enrich(mk(title="MSCA Staff Exchanges 2027", budget_total=95_000_000), CFG, PROF)
+    assert c.grant_size is None
+    flags = apply_gates(c, CFG, PROF)
+    assert any("unpublished" in f for f in flags), flags
+
+
+def test_small_call_with_unknown_award_size_is_kept():
+    c = enrich(mk(title="Javni poziv za potporu", budget_total=200_000), CFG, PROF)
+    assert not any("unpublished" in f for f in apply_gates(c, CFG, PROF))
+
+
+def test_call_with_no_budget_at_all_is_kept():
+    """Cantonal and Croatian listings publish no figures; they must survive."""
+    c = enrich(mk(source="hbz-mpvs", title="Javni poziv za potporu mladim poljoprivrednicima"), CFG, PROF)
+    assert c.grant_size is None and c.budget_total is None
+    assert not any("cap" in f or "unpublished" in f for f in apply_gates(c, CFG, PROF))

@@ -45,7 +45,7 @@
     <div class="row">
       <div class="chips" id="cats" role="group" aria-label="Category"></div>
       <label class="chk"><input type="checkbox" id="showGated"> Show flagged calls</label>
-      <label class="chk"><input type="checkbox" id="hideUnknown"> Hide unknown amounts</label>
+      <label class="chk"><input type="checkbox" id="hideUnknown"> Only calls with a published amount</label>
       <label class="chk"><input type="checkbox" id="onlySaved"> Saved only</label>
     </div>
   </section>
@@ -61,8 +61,10 @@
 
 <footer class="wrap foot">
   <p>Data from the EU Funding &amp; Tenders Portal SEDIA API plus configured national sources.
-     Refreshed weekly by GitHub Actions. Figures marked <span class="est">est</span> are derived, not published —
-     always confirm against the call document before committing time or money.</p>
+     Refreshed weekly by GitHub Actions. <strong>Most national and cantonal calls publish no figure at all</strong> —
+     those read “amount not published”, which is the truth rather than a guess. <span class="est">ceiling</span> marks an
+     upper limit set by programme rules, not an expected award; <span class="est">est</span> marks a derived figure.
+     Always confirm against the call document before committing time or money.</p>
 </footer>
 
 <script src="app.js"></script>

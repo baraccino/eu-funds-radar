@@ -58,8 +58,15 @@ def apply_gates(call: Call, cfg: dict, profile: dict) -> list[str]:
         failed.append(f"under {g['min_days_to_deadline']} days left")
 
     cap = cfg.get("limits", {}).get("max_grant_eur")
-    if cap and call.grant_size is not None and call.grant_size > cap:
-        failed.append(f"over EUR {cap:,.0f} cap")
+    if cap:
+        if call.grant_size is not None and call.grant_size > cap:
+            failed.append(f"over EUR {cap:,.0f} cap")
+        elif call.grant_size is None and call.budget_total and call.budget_total > cap:
+            # An unknown per-grant size can never exceed a cap, so without this
+            # the cap silently keeps exactly the calls it cannot measure. A
+            # whole-call budget far above the cap is not a small opportunity.
+            failed.append(
+                f"call budget EUR {call.budget_total:,.0f}, award size unpublished")
 
     if g.get("exclude_below_min_grant") and call.grant_size is not None:
         if call.grant_size < profile["constraints"]["min_grant_eur"]:

@@ -122,14 +122,18 @@ function card(c) {
     : state.sort === "weighted"
     ? [c.weighted_score == null ? "—" : c.weighted_score.toFixed(0), "score / 100"]
     : state.sort === "amount" || state.sort === "deadline"
-      ? [eur(c.grant_size), "grant size"]
+      ? [c.grant_size == null ? "—" : (c.grant_is_ceiling ? "≤" : "") + eur(c.grant_size),
+         c.grant_is_ceiling ? "ceiling" : "grant size"]
       : [c.cash_velocity_risk == null ? "—" : "€" + num(c.cash_velocity_risk), "per effort-day"];
 
   return `<article class="card t${t} ${c.gates_failed.length ? "gated" : ""} ${decision === "saved" ? "saved" : ""}">
     <div>
       <h3 class="ttl"><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title)}</a></h3>
       <p class="meta">
-        <b>${eur(c.grant_size)}</b>${c.grant_size_assumed && c.grant_size != null ? '<span class="est">est</span>' : ""}
+        <b>${c.grant_size == null ? "amount not published"
+             : (c.grant_is_ceiling ? "up to " : "") + eur(c.grant_size)}</b>${
+          c.grant_size != null && c.grant_is_ceiling ? '<span class="est">ceiling</span>'
+          : c.grant_size != null && c.grant_size_assumed ? '<span class="est">est</span>' : ""}
         <span>·</span><span>${esc(c.programme || c.source)}</span>
         <span>·</span><span>${dl}</span>
         <span>·</span><span>${c.effort_days ?? "?"}d effort<span class="est">est</span></span>
