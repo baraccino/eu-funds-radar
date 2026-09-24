@@ -125,11 +125,34 @@ Learned from the live endpoint, not the docs:
 
 ---
 
-## Setup
+## Deployment
 
-1. Push to a GitHub repo.
-2. **Settings → Pages → Source: GitHub Actions.**
-3. **Settings → Actions → General → Workflow permissions: Read and write.**
-4. Actions tab → *Weekly funding scan* → **Run workflow** to seed it.
+Two independent refresh paths. Either alone is enough; running both is harmless.
 
-It then runs every Monday at 06:00 UTC.
+### 1. Hosted page (live now, nothing to configure)
+
+The portal is published as a private Claude Artifact:
+
+**https://claude.ai/artifact/FRjsXReoWXr5JKJPeGWbfx**
+
+A scheduled Claude routine (`EU Funds Radar — weekly scan`, Mondays 06:00 UTC)
+clones this repo, runs the scan, rebuilds `dist/artifact.html` and republishes
+to that same URL, then pushes the refreshed `docs/data/calls.json` back here.
+
+Rebuild and republish by hand at any time:
+
+```bash
+python run.py && python build_artifact.py
+```
+
+### 2. GitHub Pages (optional, fully self-contained)
+
+More robust, because it runs inside GitHub with no dependency on a Claude
+session. Two settings to flip once:
+
+1. **Settings → Actions → General → Workflow permissions → Read and write**
+2. **Settings → Pages → Source → GitHub Actions**
+
+Then Actions → *Weekly funding scan* → **Run workflow**. After that it runs
+every Monday at 06:00 UTC and serves `docs/` at
+`https://baraccino.github.io/eu-funds-radar/`.
