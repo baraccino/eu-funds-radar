@@ -17,7 +17,7 @@
     </div>
     <div class="topactions">
       <button id="themeBtn" class="btn ghost" type="button" aria-label="Toggle colour theme">Theme</button>
-      <button id="exportBtn" class="btn ghost" type="button">Export decisions</button>
+      <button id="exportBtn" class="btn ghost" type="button">Copy decisions</button>
     </div>
   </div>
 </header>
@@ -52,6 +52,8 @@
   <p class="explain" id="explain"></p>
   <div id="list" class="list"></div>
   <p id="empty" class="empty" hidden>Nothing matches these filters.</p>
+
+  <pre id="fallbackExport" class="fallback" hidden></pre>
 
   <section class="sources" id="sources"></section>
 </main>

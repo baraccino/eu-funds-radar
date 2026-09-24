@@ -1,5 +1,6 @@
 # Non-API sources. Each is data, not code — add a site by adding a block.
 #
+# parser:   (omitted) static HTML | table = parse <table> rows | js = render first
 # verified: true  = selectors were tested against the live page and matched
 # verified: false = plausible target, NOT yet confirmed. Run verify_sources.py.
 #
@@ -87,22 +88,30 @@ sources:
   # verify_sources.py reports them as returning nothing.
   - id: interreg-ipa-cbc
     name: "Interreg IPA CBC Croatia–BiH–Montenegro"
-    url: "https://interreg-hr-ba-me.eu/"
-    link_selector: "h2 a, h3 a, .entry-title a, article a"
+    url: "https://interreg-hr-ba-me.eu/project/procurements-tenders/"
+    link_selector: "p a, li a, h2 a, h3 a"
+    title_min_len: 22
     category: Interreg
     call_type: grant
     countries: [HR, BiH, ME]
     programme: "Interreg IPA CBC HR-BA-ME"
     verified: false
-    note: "Domain responds; homepage lists news, not calls. Needs a calls-page URL."
+    note: >-
+      Checked 2026-09-24: this programme publishes no machine-readable list of
+      open calls. Its tenders page is prose with PDF attachments, so there is
+      nothing reliable to parse. Revisit when the next call round opens.
 
   - id: interreg-danube
     name: "Interreg Danube Region"
     url: "https://interreg-danube.eu/calls-for-proposals"
-    link_selector: "h2 a, h3 a, .entry-title a, .views-row a, .card a"
+    parser: js
     category: Interreg
     call_type: grant
     countries: [BiH]
     programme: "Interreg Danube"
     verified: false
-    note: "URL correct and returns 200, but the call list is JavaScript-rendered."
+    note: >-
+      JavaScript-rendered: 60 KB of markup, ~3,700 characters of visible text,
+      no JSON endpoint. Needs the browser parser. Could not be verified from
+      the build sandbox, whose TLS proxy Chromium does not trust; it runs for
+      real in GitHub Actions.

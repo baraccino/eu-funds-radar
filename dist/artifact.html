@@ -1,3 +1,203 @@
+<title>EU Funds Radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --surface-0:#f7f7f5;
+  --surface-1:#fcfcfb;
+  --surface-2:#f0efec;
+  --border:#dedcd6;
+  --text-primary:#0b0b0b;
+  --text-secondary:#52514e;
+  --text-muted:#7c7a74;
+  /* Ordinal tier ramp — single blue hue, validated light→dark for light surface */
+  --tier-1:#184f95;
+  --tier-2:#2a78d6;
+  --tier-3:#5598e7;
+  --tier-4:#86b6ef;
+  --good:#1baf7a;
+  --warning:#eda100;
+  --critical:#e34948;
+  --accent:#2a78d6;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme: dark;
+    --surface-0:#121211;
+    --surface-1:#1a1a19;
+    --surface-2:#232322;
+    --border:#333331;
+    --text-primary:#ffffff;
+    --text-secondary:#c3c2b7;
+    --text-muted:#908e85;
+    --tier-1:#9ec5f4;
+    --tier-2:#6da7ec;
+    --tier-3:#3987e5;
+    --tier-4:#184f95;
+    --good:#199e70;
+    --warning:#c98500;
+    --critical:#e66767;
+    --accent:#3987e5;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --surface-0:#121211; --surface-1:#1a1a19; --surface-2:#232322; --border:#333331;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#908e85;
+  --tier-1:#9ec5f4; --tier-2:#6da7ec; --tier-3:#3987e5; --tier-4:#184f95;
+  --good:#199e70; --warning:#c98500; --critical:#e66767; --accent:#3987e5;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--surface-0); color:var(--text-primary);
+  font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+.top{background:var(--surface-1);border-bottom:1px solid var(--border);padding:18px 0;margin-bottom:20px}
+.topbar{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+h1{margin:0;font-size:19px;letter-spacing:-.01em}
+.sub{margin:3px 0 0;color:var(--text-muted);font-size:13px}
+.topactions{display:flex;gap:8px}
+.btn{font:inherit;font-size:13px;padding:7px 12px;border-radius:8px;border:1px solid var(--border);
+     background:var(--surface-2);color:var(--text-primary);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.ghost{background:transparent}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.kpi{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.kpi b{display:block;font-size:26px;line-height:1.15;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi span{display:block;font-size:12px;color:var(--text-muted);margin-top:2px}
+
+.controls{background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius);
+          padding:12px;margin-bottom:14px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row+.row{margin-top:10px}
+input[type=search],select{font:inherit;font-size:14px;padding:8px 10px;border-radius:8px;
+  border:1px solid var(--border);background:var(--surface-2);color:var(--text-primary)}
+input[type=search]{flex:1;min-width:200px}
+.sel{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text-secondary)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:13px;padding:5px 11px;border-radius:999px;border:1px solid var(--border);
+      background:transparent;color:var(--text-secondary);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+.chk{font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer}
+.explain{font-size:13px;color:var(--text-muted);margin:0 0 10px}
+
+.list{display:flex;flex-direction:column;gap:8px}
+.card{background:var(--surface-1);border:1px solid var(--border);border-left:4px solid var(--tier-4);
+      border-radius:var(--radius);padding:12px 14px;display:grid;
+      grid-template-columns:1fr auto;gap:10px 16px;align-items:start}
+.card.t1{border-left-color:var(--tier-1)} .card.t2{border-left-color:var(--tier-2)}
+.card.t3{border-left-color:var(--tier-3)} .card.t4{border-left-color:var(--tier-4)}
+.card.gated{opacity:.62}
+.card.saved{box-shadow:inset 3px 0 0 var(--good)}
+.ttl{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.ttl a{color:inherit;text-decoration:none}
+.ttl a:hover{text-decoration:underline;text-decoration-color:var(--accent)}
+.meta{margin:5px 0 0;font-size:12.5px;color:var(--text-muted);display:flex;gap:8px;flex-wrap:wrap}
+.meta b{color:var(--text-secondary);font-weight:600}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.tag{font-size:11px;padding:2px 7px;border-radius:5px;background:var(--surface-2);
+     color:var(--text-secondary);border:1px solid var(--border)}
+.tag.tier{background:transparent;border-color:currentColor;font-weight:600}
+.t1 .tag.tier{color:var(--tier-1)} .t2 .tag.tier{color:var(--tier-2)}
+.t3 .tag.tier{color:var(--tier-3)} .t4 .tag.tier{color:var(--tier-4)}
+.tag.flag{color:var(--critical);border-color:currentColor}
+.est{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--warning);
+     border:1px solid currentColor;border-radius:4px;padding:0 3px;margin-left:4px;vertical-align:1px}
+.num{text-align:right;min-width:132px}
+.num .big{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em;display:block}
+.num .lbl{font-size:11px;color:var(--text-muted);display:block;margin-top:1px}
+.acts{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}
+.acts button{font:inherit;font-size:12px;padding:4px 9px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--border);background:transparent;color:var(--text-secondary)}
+.acts button:hover{border-color:var(--accent);color:var(--text-primary)}
+.deadline-soon{color:var(--critical);font-weight:600}
+
+.sources{margin:26px 0;background:var(--surface-1);border:1px solid var(--border);
+         border-radius:var(--radius);padding:14px}
+.sources h2{font-size:14px;margin:0 0 9px}
+.srcgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px;font-size:12.5px}
+.src{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dashed var(--border)}
+.src .ok{color:var(--good)} .src .warn{color:var(--warning)} .src .bad{color:var(--critical)}
+.empty{text-align:center;color:var(--text-muted);padding:34px 0}
+.foot{margin:28px auto;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border);padding-top:14px}
+@media (max-width:640px){
+  .card{grid-template-columns:1fr}
+  .num{text-align:left;min-width:0}
+  .acts{justify-content:flex-start}
+}
+
+.fallback{margin:14px 0;padding:12px;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:var(--radius);font-size:12px;color:var(--text-secondary);
+  max-height:240px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+
+
+body{font-family:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.kpi b,.num .big,.meta b,.num .lbl{font-family:"IBM Plex Mono","SF Mono",ui-monospace,Menlo,Consolas,monospace;
+  font-variant-numeric:tabular-nums}
+h1{font-family:"IBM Plex Mono","SF Mono",ui-monospace,monospace;font-weight:600;letter-spacing:-.02em}
+</style>
+<header class="top">
+  <div class="wrap topbar">
+    <div>
+      <h1>EU Funds Radar</h1>
+      <p class="sub" id="freshness">Loading…</p>
+    </div>
+    <div class="topactions">
+      <button id="themeBtn" class="btn ghost" type="button" aria-label="Toggle colour theme">Theme</button>
+      <button id="exportBtn" class="btn ghost" type="button">Copy decisions</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="kpis" id="kpis" aria-label="Summary"></section>
+
+  <section class="controls" aria-label="Filters and sorting">
+    <div class="row">
+      <input id="q" type="search" placeholder="Search title, programme, keyword…" aria-label="Search">
+      <label class="sel">
+        <span>Rank by</span>
+        <select id="sort">
+          <option value="combined">Combined — gates, tier, then cash velocity</option>
+          <option value="cvr">Cash velocity (risk-adjusted)</option>
+          <option value="cv">Cash velocity (raw, risk-neutral)</option>
+          <option value="weighted">Weighted score 0–100</option>
+          <option value="tier">Tier only</option>
+          <option value="amount">Grant size</option>
+          <option value="deadline">Deadline soonest</option>
+        </select>
+      </label>
+    </div>
+    <div class="row">
+      <div class="chips" id="cats" role="group" aria-label="Category"></div>
+      <label class="chk"><input type="checkbox" id="showGated"> Show flagged calls</label>
+      <label class="chk"><input type="checkbox" id="hideUnknown"> Hide unknown amounts</label>
+      <label class="chk"><input type="checkbox" id="onlySaved"> Saved only</label>
+    </div>
+  </section>
+
+  <p class="explain" id="explain"></p>
+  <div id="list" class="list"></div>
+  <p id="empty" class="empty" hidden>Nothing matches these filters.</p>
+
+  <pre id="fallbackExport" class="fallback" hidden></pre>
+
+  <section class="sources" id="sources"></section>
+</main>
+
+<footer class="wrap foot">
+  <p>Data from the EU Funding &amp; Tenders Portal SEDIA API plus configured national sources.
+     Refreshed weekly by GitHub Actions. Figures marked <span class="est">est</span> are derived, not published —
+     always confirm against the call document before committing time or money.</p>
+</footer>
+<script>
 /* EU Funds Radar — static portal.
    Data is regenerated weekly by GitHub Actions into data/calls.json.
    Your decisions (saved / dismissed) live in this browser only, and can be
@@ -235,3 +435,5 @@ function wire() {
     (age > 8 ? ` · ⚠ ${age} days old, the weekly job may have stopped` : age ? ` · ${age}d ago` : " · today");
   wire(); sources(); render();
 })();
+
+</script>

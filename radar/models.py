@@ -117,6 +117,7 @@ class Call:
         d = asdict(self)
         for k in ("opens", "deadline"):
             d[k] = d[k].isoformat() if d[k] else None
+        d = {k: _scrub(v) for k, v in d.items()}
         d["uid"] = self.uid
         d["days_to_deadline"] = self.days_to_deadline
         return d
@@ -124,3 +125,18 @@ class Call:
 
 def parse_date(v: Any) -> date | None:
     return _parse_date(v)
+
+
+def _scrub(v: Any) -> Any:
+    """Drop U+FFFD replacement characters from strings.
+
+    Upstream data carries them: SEDIA publishes truncated keywords such as
+    "EU Innov\ufffd". They are not ours to interpret, and they break strict
+    consumers downstream, so they are removed at serialisation rather than
+    guessed at.
+    """
+    if isinstance(v, str):
+        return v.replace("\ufffd", "").strip()
+    if isinstance(v, list):
+        return [_scrub(x) for x in v]
+    return v

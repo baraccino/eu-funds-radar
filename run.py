@@ -20,7 +20,7 @@ import yaml
 
 from radar.enrich import enrich_all
 from radar.rank import rank_all
-from radar.sources import cascade, html_listing, sedia
+from radar.sources import cascade, html_listing, js_listing, sedia
 
 ROOT = pathlib.Path(__file__).resolve().parent
 OUT = ROOT / "docs" / "data" / "calls.json"
@@ -63,10 +63,17 @@ def main() -> int:
     # --- HTML listing sources ---
     try:
         calls.extend(html_listing.fetch(
-            [s for s in sources_cfg if s.get("parser") != "table"], log=log))
+            [s for s in sources_cfg if not s.get("parser")], log=log))
     except Exception as e:  # noqa: BLE001
         errors.append({"source": "html", "error": f"{type(e).__name__}: {e}"})
         log(f"  HTML sources FAILED: {e}")
+
+    # --- JavaScript-rendered listings (optional; needs playwright) ---
+    try:
+        calls.extend(js_listing.fetch(sources_cfg, log=log))
+    except Exception as e:  # noqa: BLE001
+        errors.append({"source": "js", "error": f"{type(e).__name__}: {e}"})
+        log(f"  JS sources FAILED: {e}")
 
     # --- cascade / FSTP tables (the easy-money layer) ---
     try:
