@@ -23,6 +23,22 @@ RESTRICTED = [
     (r"\bngo\b|non-?governmental|civil\s+society", "restricted to NGOs or civil society"),
 ]
 
+# Nationality adjectives that scope a call to one country. Bosnian/Herzegovinian
+# are absent on purpose — those are the ones that would INCLUDE this applicant.
+NATIONALITIES = (
+    "estonian|latvian|lithuanian|polish|czech|slovak|slovenian|croatian|hungarian"
+    "|romanian|bulgarian|greek|italian|spanish|portuguese|french|german|austrian"
+    "|dutch|belgian|danish|swedish|finnish|norwegian|irish|maltese|cypriot"
+    "|serbian|montenegrin|albanian|macedonian|kosovar|turkish|ukrainian|moldovan"
+)
+# Allow "Slovenian and Croatian SCOs" as well as "Estonian companies": the
+# nationality may sit a few words away from the noun it scopes.
+ORG_NOUN = (r"compan|sme|sco|cso|ngo|organisation|organization|startup|start-up"
+            r"|business|researcher|partner|applicant|entit|institution|firm")
+COUNTRY_SCOPED = re.compile(
+    rf"\b({NATIONALITIES})\b(?:\s+(?:and|or|,)\s+\w+)?(?:\s+\w+){{0,2}}\s+({ORG_NOUN})",
+    re.I)
+
 
 # ---------------------------------------------------------------- gates
 def apply_gates(call: Call, cfg: dict, profile: dict) -> list[str]:
@@ -56,6 +72,10 @@ def apply_gates(call: Call, cfg: dict, profile: dict) -> list[str]:
             failed.append(label)
             break
 
+    m = COUNTRY_SCOPED.search(blob)
+    if m:
+        failed.append(f"looks scoped to {m.group(1)} applicants — check eligibility")
+
     return failed
 
 
@@ -69,6 +89,11 @@ def tier_of(call: Call, cfg: dict) -> int:
     # into tier 1 lets a scraped factsheet outrank a real multi-million call.
     if call.grant_size is None:
         return 3
+
+    # Easy money you cannot date is not actionable, and a missing deadline is
+    # the signature of a scraped link that is not really a call.
+    if call.deadline is None:
+        return max(3, 2)
 
     partners = call.min_partners or 1
     upfront = call.upfront_pct or 0.0

@@ -20,7 +20,7 @@ import yaml
 
 from radar.enrich import enrich_all
 from radar.rank import rank_all
-from radar.sources import html_listing, sedia
+from radar.sources import cascade, html_listing, sedia
 
 ROOT = pathlib.Path(__file__).resolve().parent
 OUT = ROOT / "docs" / "data" / "calls.json"
@@ -62,10 +62,18 @@ def main() -> int:
 
     # --- HTML listing sources ---
     try:
-        calls.extend(html_listing.fetch(sources_cfg, log=log))
+        calls.extend(html_listing.fetch(
+            [s for s in sources_cfg if s.get("parser") != "table"], log=log))
     except Exception as e:  # noqa: BLE001
         errors.append({"source": "html", "error": f"{type(e).__name__}: {e}"})
         log(f"  HTML sources FAILED: {e}")
+
+    # --- cascade / FSTP tables (the easy-money layer) ---
+    try:
+        calls.extend(cascade.fetch(sources_cfg, log=log))
+    except Exception as e:  # noqa: BLE001
+        errors.append({"source": "cascade", "error": f"{type(e).__name__}: {e}"})
+        log(f"  Cascade sources FAILED: {e}")
 
     if not calls:
         log("ABORT: zero calls fetched; refusing to overwrite good data")

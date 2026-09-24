@@ -37,7 +37,9 @@ DATE_RX = re.compile(r"(\d{1,2}[.\-/]\d{1,2}[.\-/]\d{4})|(\d{4}-\d{2}-\d{2})")
 # Titles that match a call keyword but are not themselves a call to apply to.
 NOT_A_CALL = re.compile(
     r"^https?://|^www\.|factsheet|newsletter|privacy|cookie|guidance\s+note"
-    r"|frequently\s+asked|^obrazac|^prijavni\s+obrazac|^formular|\.pdf$",
+    r"|frequently\s+asked|^obrazac|^prijavni\s+obrazac|^formular|\.pdf$"
+    r"|internship|scholarship|traineeship|fellowship|summer\s+school|\bphd\b"
+    r"|master\s+thesis|mobility\s+grant|doctoral",
     re.I,
 )
 

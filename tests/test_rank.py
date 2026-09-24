@@ -165,3 +165,30 @@ def test_restriction_flag_does_not_delete_the_call():
 def test_unrestricted_call_is_not_flagged():
     c = enrich(mk(title="Digital innovation deployment platform", grant_max=200_000), CFG, PROF)
     assert not any("restricted" in f for f in apply_gates(c, CFG, PROF))
+
+
+def test_cascade_without_deadline_cannot_be_tier_1():
+    c = enrich(mk(title="some cascade call", call_type="cascade",
+                  grant_max=60_000, deadline=None), CFG, PROF)
+    assert tier_of(c, CFG) >= 2, "an undateable call is not actionable"
+
+
+def test_country_scoped_call_is_flagged():
+    c = enrich(mk(title="Innovation Funding for Estonian Cybersecurity Companies",
+                  grant_max=60_000), CFG, PROF)
+    flags = apply_gates(c, CFG, PROF)
+    assert any("estonian" in f.lower() for f in flags), flags
+
+
+def test_bih_relevant_call_is_not_country_flagged():
+    for title in ["Open call for SMEs across Europe",
+                  "AI4Gov-X Cascade Funding Call",
+                  "Support for Bosnian companies"]:
+        c = enrich(mk(title=title, grant_max=60_000), CFG, PROF)
+        assert not any("scoped to" in f for f in apply_gates(c, CFG, PROF)), title
+
+
+def test_multi_country_scope_is_caught():
+    c = enrich(mk(title="Call for proposal for support to Slovenian and Croatian SCOs",
+                  grant_max=60_000), CFG, PROF)
+    assert any("scoped to" in f for f in apply_gates(c, CFG, PROF))

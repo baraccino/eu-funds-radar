@@ -63,7 +63,8 @@ This tool feeds real financial decisions, so:
 - **Applicant restrictions are detected by keyword**, from the title and summary only. A restriction that only appears in the call PDF will be missed. *Always read the call document before investing time.*
 - **Win probability is a prior**, adjusted by how many awards a call expects to make. Real competition ratios are rarely published.
 - **Effort estimates are heuristics** from the instrument type and award size, not from reading the application pack.
-- **Cascade funding coverage is thin.** It's the highest-value category and the worst-indexed — each funded project publishes its own call on its own site. Adding good cascade sources is the single biggest improvement available.
+- **Interreg is not yet working.** All three programmes render their call lists with JavaScript, so a static fetch returns nothing. Fixing them needs a JSON endpoint or Playwright in the workflow.
+- **Cascade grant sizes are assumed, not published.** Aggregator tables don't carry amounts, so cascade calls use the standard Horizon Europe FSTP ceiling of **€60,000 per third party** as a conservative floor, always shown as `est`. Call conditions can raise it — read the call.
 
 ---
 
@@ -72,7 +73,7 @@ This tool feeds real financial decisions, so:
 ```bash
 pip install -r requirements.txt
 python run.py                 # scrape, enrich, rank -> docs/data/calls.json
-python -m pytest tests/ -q    # 19 tests
+python -m pytest tests/ -q    # 23 tests
 python verify_sources.py      # which scrapers still parse?
 cd docs && python -m http.server 8000
 ```
@@ -99,9 +100,18 @@ Then run `python verify_sources.py` — it reports which selectors match and whi
 config/       profile, ranking weights, source definitions  <- tune here
 radar/        models, enrichment, ranking, sources
 docs/         the static site (GitHub Pages root)
-tests/        19 tests, run in CI before every scrape
+tests/        23 tests, run in CI before every scrape
 run.py        the weekly pipeline
 ```
+
+## Where cascade calls come from
+
+Cascade sub-calls are **not in the portal API** — verified by querying SEDIA for
+the Horizon Europe framework programme, which returns the parent research calls,
+not the sub-calls those projects later publish. Each funded project runs its own
+open call on its own site, so the only practical index is a curated aggregator.
+The tool reads Kaila's cascade roundup, which publishes a table with up to five
+deadline rounds per call; rows whose deadlines have all passed are dropped.
 
 ## Notes on the SEDIA API
 

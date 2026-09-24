@@ -54,15 +54,20 @@ sources:
     note: "IPA and EU-funded calls for BiH. URL needs confirming."
 
   # ------------------------------------------------------------ Cascade
-  - id: cascade-innovarum
-    name: "Cascade funding tracker (Innovarum)"
-    url: "https://innovarum.es/en/horizon-europe/cascade-funding-fstp-opening-project-doors-to-farmers-cooperatives-and-start-ups/"
-    link_selector: "a"
+  # Cascade sub-calls are NOT in the EU portal API (verified), so a curated
+  # aggregator is the only practical index.
+  - id: cascade-kaila
+    name: "Kaila — cascade funding roundup"
+    url: "https://kaila.eu/blog/cascade-funding-101-open-calls/"
+    parser: table
     category: IT
     call_type: cascade
     programme: "Cascade / FSTP"
-    verified: false
-    note: "Aggregator of FSTP open calls. The easy-money layer."
+    # Standard Horizon Europe FSTP ceiling per third party. Call conditions can
+    # raise it, so this is a conservative floor, always shown as an estimate.
+    assumed_grant_eur: 60000
+    verified: true
+    note: "Table of live FSTP open calls with multiple deadline rounds."
 
   - id: cascade-eudis
     name: "EUDIS cascade funding"
@@ -75,32 +80,29 @@ sources:
     note: "EU Defence Innovation Scheme cascade calls."
 
   # ----------------------------------------------------------- Interreg
+  # All three Interreg programmes below need work. Their old URLs were dead;
+  # these respond, but the pages render their call lists with JavaScript, so a
+  # static fetch returns no anchors. Fixing them means either finding a JSON
+  # endpoint or running Playwright in the workflow. Left enabled and honest:
+  # verify_sources.py reports them as returning nothing.
   - id: interreg-ipa-cbc
     name: "Interreg IPA CBC Croatia–BiH–Montenegro"
-    url: "https://www.interreg-hr-ba-me2127.eu/"
+    url: "https://interreg-hr-ba-me.eu/"
     link_selector: "h2 a, h3 a, .entry-title a, article a"
     category: Interreg
     call_type: grant
     countries: [HR, BiH, ME]
     programme: "Interreg IPA CBC HR-BA-ME"
     verified: false
-
-  - id: interreg-adrion
-    name: "Interreg ADRION"
-    url: "https://www.adrioninterreg.eu/index.php/category/calls/"
-    link_selector: "h2 a, h3 a, .entry-title a"
-    category: Interreg
-    call_type: grant
-    countries: [BiH]
-    programme: "Interreg ADRION"
-    verified: false
+    note: "Domain responds; homepage lists news, not calls. Needs a calls-page URL."
 
   - id: interreg-danube
     name: "Interreg Danube Region"
-    url: "https://interreg-danube.eu/calls"
-    link_selector: "h2 a, h3 a, .entry-title a, .views-row a"
+    url: "https://interreg-danube.eu/calls-for-proposals"
+    link_selector: "h2 a, h3 a, .entry-title a, .views-row a, .card a"
     category: Interreg
     call_type: grant
     countries: [BiH]
     programme: "Interreg Danube"
     verified: false
+    note: "URL correct and returns 200, but the call list is JavaScript-rendered."
